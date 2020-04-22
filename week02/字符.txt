@@ -1,0 +1,32 @@
+WhiteSpace  空白符
+    <TAB>  水平制表符 \U0009
+    <VT>   纵向制表符 \U0010
+    <FF>   荒废
+    <SP>   普通空格            \0020
+    <NBSP> NO-BREAK SPACE    \U0A0
+    <ZWNBSP> ZERO WITH NO-BREAK SPACE  U+FEXX
+    <USP>
+LineTerminator  换行符
+Comment
+//  
+/**/
+Token
+Punctuator
+
+IdentifierName
+  变量名
+  KeyWords 
+  Identifier
+  future reserved KeyWords :enum 保留关键字
+
+
+Literal  数据类型
+Number
+String
+Boolean
+Null
+Object
+undefined
+Symbol
+
+
