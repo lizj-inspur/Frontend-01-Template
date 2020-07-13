@@ -1,0 +1,181 @@
+<html>
+  <style>
+    #board {
+      width: 350px;
+    }
+    .cell {
+      height: 100px;
+      width: 100px;
+      background-color: green;
+      vertical-align: middle;
+      display: inline-block;
+      border: solid 1px white;
+      font-size: 50px;
+      line-height: 100px;
+      text-align: center;
+    }
+  </style>
+
+  <body>
+    <div id="board"></div>
+  </body>
+  <script type="text/javascript">
+    let pattern = [
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
+    ];
+    let color = 1;
+
+    function show() {
+      let board = document.getElementById("board");
+      board.innerHTML = "";
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          let cell = document.createElement("div");
+          cell.classList.add("cell");
+          cell.innerText =
+            pattern[i][j] == 2 ? "🔺" : pattern[i][j] == 1 ? "🔴" : "";
+          cell.addEventListener("click", () => move(j, i));
+          board.appendChild(cell);
+        }
+        board.appendChild(document.createElement("br"));
+      }
+    }
+
+    function move(x, y) {
+      if (pattern[y][x] !== 0) {
+        return;
+      }
+      pattern[y][x] = color;
+      show();
+      if (check(pattern, color)) {
+        alert(color == "2" ? "🔺 is winner " : "🔴 is winner !");
+
+        pattern = [
+          [0, 0, 0],
+          [0, 0, 0],
+          [0, 0, 0],
+        ];
+        setTimeout("show()", 1000);
+      }
+      color = 3 - color;
+      if (willWin(pattern, color)) {
+        console.log(color == 2 ? "🔺 will win " : "🔴 will win ");
+      }
+    }
+
+    function check(pattern, color) {
+      for (let i = 0; i < 3; i++) {
+        let win = true;
+        for (let j = 0; j < 3; j++) {
+          if (pattern[i][j] != color) {
+            win = false;
+            break;
+          }
+        }
+        if (win) {
+          return true;
+        }
+      }
+      for (let i = 0; i < 3; i++) {
+        let win = true;
+        for (let j = 0; j < 3; j++) {
+          if (pattern[j][i] != color) {
+            win = false;
+            break;
+          }
+        }
+        if (win) {
+          return true;
+        }
+      }
+      {
+        let win = true;
+        for (let j = 0; j < 3; j++) {
+          if (pattern[j][j] != color) {
+            win = false;
+            break;
+          }
+        }
+        if (win) {
+          return true;
+        }
+      }
+      {
+        let win = true;
+        for (let j = 0; j < 3; j++) {
+          if (pattern[j][2 - j] != color) {
+            win = false;
+            break;
+          }
+        }
+        if (win) {
+          return true;
+        }
+      }
+    }
+
+    function clone(pattern) {
+      return JSON.parse(JSON.stringify(pattern));
+    }
+
+    function willWin(pattern, color) {
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (pattern[i][j] !== 0) {
+            continue;
+          }
+          let tmp = clone(pattern);
+          tmp[i][j] = color;
+          if (check(tmp, color)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function willLose(pattern, color) {
+      if (willWin(pattern, color)) {
+        return false;
+      }
+    }
+
+    function willWin2(pattern, color) {
+      if (willLose(patter, color)) {
+        return false;
+      }
+    }
+
+    function bestChoice(pattern, color) {
+      let point = willWin(pattern, color);
+      if (point) {
+        return {
+          point: point,
+          result: 1,
+        };
+      }
+      let result = -1;
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (pattern[i][j] !== 0) {
+            continue;
+          }
+          let tmp = clone(pattern);
+          tmp[i][j] = color;
+          let opp = bestChoice(pattern, 3 - color);
+          if (-opp.result >= result) {
+            point = [j, i];
+            result = -opp.result;
+          }
+        }
+      }
+      return {
+        point: point,
+        return: point ? result : 0,
+      };
+    }
+    show(pattern);
+  </script>
+</html>

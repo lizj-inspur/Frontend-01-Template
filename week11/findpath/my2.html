@@ -1,0 +1,147 @@
+<html>
+<title>a * 算法</title>
+<style>
+    .cell {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background-color: gray;
+        border-bottom: solid 1px white;
+        border-right: solid 1px white;
+        vertical-align: middle;
+    }
+
+    #container {
+        width: 701px;
+    }
+</style>
+<div id="container"></div>
+<button onclick="localStorage.map = JSON.stringify(map)">保存</button>
+<script type="text/javascript">
+    /**
+     ** 提供了启发算法的数据结构 每次返回集中的最小值
+     */
+    class Sortred {
+        constructor(data, compare) {
+            this.data = data;
+            this.compare = compare || ((a, b) => a - b);
+        }
+        /**
+         * 取数组中最小的值
+         */
+        take() {
+            if (!this.data.length) {
+                return;
+            }
+            let min = this.data[0];
+            let minIndex = 0;
+            for (let i = 1; i < this.data.length; i++) {
+                if (this.compare(this.data[i], min) < 0) {
+                    min = this.data[i];
+                    minIndex = i;
+                }
+            }
+            //用最后一个值 覆盖 最小值 ，然后出栈
+            this.data[minIndex] = this.data[this.data.length - 1];
+            this.data.pop();
+            return min;
+        }
+        push(v) {
+            this.data.push(v);
+        }
+        get length() {
+            return this.data.length;
+        }
+    }
+    let map = localStorage["map"] ? JSON.parse(localStorage["map"]) : Array(10000).fill(0);
+    let container = document.getElementById("container");
+    for (let y = 0; y < 100; y++) {
+        for (let x = 0; x < 100; x++) {
+            let cell = document.createElement("div");
+            cell.classList.add("cell");
+            cell.id = y * 100 + x;
+            if (map[y * 100 + x] == 1) {
+                cell.style.backgroundColor = "black";
+            }
+            ///cell.innerText = y * 100 + x;
+            cell.addEventListener("mousemove", () => {
+                if (mouse) {
+                    if (clear) {
+                        cell.style.backgroundColor = "";
+                        map[100 * y + x] = 0;
+                    } else {
+                        cell.style.backgroundColor = "black";
+                        map[100 * y + x] = 1;
+                    }
+                }
+            });
+            container.appendChild(cell);
+        }
+    }
+    let mouse = false;
+    let clear = false;
+    document.addEventListener("mousedown", e => {
+        mouse = true;
+        clear = (e.which == 3)
+    });
+    document.addEventListener("mouseup", () => mouse = false);
+    document.addEventListener("contextmenu", e => e.preventDefault());
+
+    function sleep(t) {
+        return new Promise(function (resolve) {
+            setTimeout(resolve, t);
+        });
+    }
+    async function findPath(map, start, end) {
+        container.children[end[0] * 100 + end[1]].style.backgroundColor = 'red';
+        let table = Object.create(map);
+        let queue = new Sortred([start], (a, b) => distance(a) - distance(b));
+        /**
+         ** 计算坐标之间的距离
+         */
+        function distance(point) {
+            return Math.sqrt((point[0] - end[0]) ** 2 + (point[1] - end[1]) ** 2);
+        }
+        async function insert(x, y, pre) {
+            //边界值计算
+            if (x < 0 || x >= 100 || y < 0 || y >= 100) {
+                return;
+            }
+            //如果有值了不能走
+            if (table[y * 100 + x]) {
+                return;
+            }
+            await sleep(10);
+            container.children[y * 100 + x].style.backgroundColor = 'lightgreen';
+            table[y * 100 + x] = pre; //记录当前点的上一个结点
+            queue.push([x, y]);
+        }
+        while (queue.length) {
+            let [x, y] = queue.take();
+            // let [x, y] = queue.pop();
+            //console.log(x, y);
+            //如果当前点是终点，采用回溯的方法将走的路线画出来
+            if (x === end[0] && y === end[1]) {
+                let path = [];
+                while (x != start[0] || y != start[1]) {
+                    path.push(map[y * 100 + x]);
+                    [x, y] = table[y * 100 + x];
+                    container.children[y * 100 + x].style.backgroundColor = 'purple';
+                }
+                return path;
+            }
+            //从当前点的8个方向开始寻找可以走的点
+            await insert(x - 1, y - 1, [x, y]);
+            await insert(x + 1, y - 1, [x, y]);
+            await insert(x - 1, y + 1, [x, y]);
+            await insert(x + 1, y + 1, [x, y]);
+            await insert(x - 1, y, [x, y]);
+            await insert(x, y - 1, [x, y]);
+            await insert(x + 1, y, [x, y]);
+            await insert(x, y + 1, [x, y]);
+        }
+        return null;
+    }
+</script>
+
+</html>

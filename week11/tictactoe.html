@@ -1,0 +1,216 @@
+<html>
+<style>
+    #board {
+        width: 350px;
+    }
+
+    .cell {
+        height: 100px;
+        width: 100px;
+        background-color: green;
+        vertical-align: middle;
+        display: inline-block;
+        border: solid 1px white;
+        font-size: 50px;
+        line-height: 100px;
+        text-align: center;
+    }
+</style>
+
+<body>
+    <div id="board"></div>
+</body>
+<script type="text/javascript">
+    let pattern = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ];
+    let color = 1;
+
+    function show() {
+        let board = document.getElementById("board");
+        board.innerHTML = "";
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                let cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.innerText = pattern[i][j] == 2 ? "🔺" : pattern[i][j] == 1 ? "🔴" : "";
+                cell.addEventListener("click", () => userMove(j, i));
+                board.appendChild(cell);
+            }
+            board.appendChild(document.createElement("br"));
+        }
+    }
+    /**
+     * 鼠标单击事件
+     */
+    function userMove(x, y) {
+        if (pattern[y][x] !== 0) {
+            return;
+        }
+        pattern[y][x] = color;
+        show();
+        if (check(pattern, color)) {
+            alert(color == "2" ? "🔺 is winner " : "🔴 is winner !");
+            pattern = [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0],
+            ];
+            setTimeout("show()", 5000);
+            return;
+        }
+        color = 3 - color;
+        computeMove();
+    }
+    /**
+     * 模拟机器人下一步走法
+     */
+    function computeMove() {
+        let choice = bestChoice(pattern, color);
+        if (choice.point) {
+            pattern[choice.point[1]][choice.point[0]] = color;
+        }
+        show();
+        if (check(pattern, color)) {
+            alert(color == "2" ? "🔺 is winner " : "🔴 is winner !");
+            pattern = [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0],
+            ];
+            setTimeout("show()", 5000);
+            return;
+        }
+        color = 3 - color;
+    }
+    /**
+     **
+     检查是胜负情况
+     三横三竖线 + 对角线
+     */
+    function check(pattern, color) {
+        for (let i = 0; i < 3; i++) {
+            let win = true;
+            for (let j = 0; j < 3; j++) {
+                if (pattern[i][j] != color) {
+                    win = false;
+                    break;
+                }
+            }
+            if (win) {
+                return true;
+            }
+        }
+        for (let i = 0; i < 3; i++) {
+            let win = true;
+            for (let j = 0; j < 3; j++) {
+                if (pattern[j][i] != color) {
+                    win = false;
+                    break;
+                }
+            }
+            if (win) {
+                return true;
+            }
+        } {
+            let win = true;
+            for (let j = 0; j < 3; j++) {
+                if (pattern[j][j] != color) {
+                    win = false;
+                    break;
+                }
+            }
+            if (win) {
+                return true;
+            }
+        } {
+            let win = true;
+            for (let j = 0; j < 3; j++) {
+                if (pattern[j][2 - j] != color) {
+                    win = false;
+                    break;
+                }
+            }
+            if (win) {
+                return true;
+            }
+        }
+    }
+    /***
+     * 复制对象
+     */
+    function clone(pattern) {
+        return JSON.parse(JSON.stringify(pattern));
+    }
+    //预置一些走法
+    let openings = new Map();
+    openings.set([
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ].toString() + "1", {
+        point: [1, 1],
+        result: 0
+    });
+    /**
+     ** 判断下一步是不是赢了
+     */
+    function willWin(pattern, color) {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (pattern[i][j] !== 0) {
+                    continue;
+                }
+                let tmp = clone(pattern);
+                tmp[i][j] = color;
+                if (check(tmp, color)) {
+                    return [j, i];
+                }
+            }
+        }
+        return null;
+    }
+    /**
+     * 寻找下一步最优走法
+     * 取对手的下一步能赢的地方做为返回值
+     */
+    function bestChoice(pattern, color) {
+        if (openings.has(pattern.toString() + color)) {
+            return openings.get(pattern.toString() + color);
+        }
+        let point = willWin(pattern, color);
+        if (point) {
+            return {
+                point: point,
+                result: 1,
+            };
+        }
+        let result = -1;
+        outer: for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (pattern[i][j] !== 0) {
+                    continue;
+                }
+                let tmp = clone(pattern);
+                tmp[i][j] = color;
+                let opp = bestChoice(tmp, 3 - color);
+                if (-opp.result >= result) {
+                    point = [j, i];
+                    result = -opp.result;
+                }
+                if (result == 1) {
+                    break outer;
+                }
+            }
+        }
+        return {
+            point: point,
+            result: point ? result : 0,
+        };
+    }
+    show(pattern);
+</script>
+
+</html>

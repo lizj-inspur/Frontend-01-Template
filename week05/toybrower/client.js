@@ -2,6 +2,8 @@
  * 模拟实现客户端调用
  */
 const net = require("net");
+//引入dom解析器
+const parser = require("./parser.js");
 /**
  * request包装类
  *
@@ -161,7 +163,7 @@ class ResponseParser {
         }
     }
     reveive(responseData) {
-        console.log(responseData);
+        //      console.log(responseData);
         for (let i = 0; i < responseData.length; i++) {
             this.reveiveChar(responseData.charAt(i));
         }
@@ -249,22 +251,22 @@ class TrunkedBodyParser {
      * @param {*} char
      */
     reveiveChar(char) {
-        console.log(JSON.stringify(char));
+        //        console.log(JSON.stringify(char));
         // console.log(this.current + "  " + char);
         if (this.current === this.WAIT_LENGTH) {
             if (char === "\r") {
                 this.current = this.WAIT_LENGTH_LINE_END;
                 //注意长度是16进制 不转换会造成数据读取不完整情况
-                this.length = parseInt(this.length, 16);
+                // this.length = parseInt(this.length, 16);
                 if (this.length === 0) {
                     this.isFinished = true;
                     this.current = this.WAIT_BODY_END; //代表解析结束了
                 }
                 // console.log("lenght=" + this.length);
             } else {
-                this.length *= 10;
+                this.length *= 16;
                 //计算length的值
-                this.length += char.charCodeAt(0) - '0'.charCodeAt(0);
+                this.length += parseInt(char, 16);
             }
         } else if (this.current === this.WAIT_LENGTH_LINE_END) {
             if (char === "\n") {
@@ -289,7 +291,7 @@ class TrunkedBodyParser {
     }
 }
 //初始化入口
-void(async function () {
+void async function () {
     let request = new Request({
         method: "POST",
         host: "127.0.0.1",
@@ -303,5 +305,6 @@ void(async function () {
         },
     });
     let response = await request.send();
-    console.log(response)
-})();
+    let dom = parser.parseHTML(response.body);
+    console.log(JSON.stringify(dom, null, "      "))
+}();
