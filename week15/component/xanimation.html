@@ -1,0 +1,53 @@
+<html>
+<style>
+    #el {
+      width: 100px;
+      height: 100px;
+      background-color: blue;
+    }
+    #el2 {
+      width: 100px;
+      height: 100px;
+      background-color: skyblue;
+      transition:transform linear 5s;
+    }
+    #el3 {
+      width: 100px;
+      height: 100px;
+      background-color: yellow;
+    }
+  </style>
+  <body>
+    <div id="el"></div>
+    <div id="el3"></div>
+    <div id="el2"></div>
+    <button id ="btn-pause">暂停</button>
+    <button id ="btn-start">开始</button>
+    <button id ="btn-el3">开始el3</button>
+    <button id ="btn-color">增加颜色动画</button>
+  </body>
+  </html>
+
+<script type="module">
+  import {TimeLine,Animation,ColorAnimation} from "./animation.js";
+  import {cubicBezier} from "./cubicBezier.js";
+  let el = document.getElementById("el");
+  let linear = t => t;
+  let ease = cubicBezier(.25,.1,.25,1);
+  let tl = new TimeLine();
+  tl.add(new Animation(el.style,"transform",v=>`translateX(${v}px)`,0,200,5000,0,linear));
+  tl.add(new ColorAnimation(el.style,"backgroundColor",v=>`rgba(${v.r},${v.g},${v.b},${v.a})`,{r:0,g:0,b:255,a:1},{r:255,g:0,b:0,a:1},5000,0,linear));
+  
+  tl.start();
+  document.getElementById("el2").style.transform = "translateX(200px)";
+  
+  document.getElementById("btn-pause").addEventListener("click" ,() => tl.pause());
+  document.getElementById("btn-start").addEventListener("click" ,() => tl.resume());
+  let el3 = document.getElementById("el3");
+  document.getElementById("btn-el3").addEventListener("click" ,() => {
+    tl.add(new Animation(el3.style,"transform",v=>`translateX(${v}px)`,0,200,5000,0,linear),0);
+  });
+  document.getElementById("btn-color").addEventListener("click" ,() => {
+    tl.add(new ColorAnimation(el.style,"backgroundColor",v=>`rgba(${v.r},${v.g},${v.b},${v.a})`,{r:0,g:0,b:255,a:1},{r:255,g:0,b:0,a:1},5000,0,linear));
+  });
+</script>

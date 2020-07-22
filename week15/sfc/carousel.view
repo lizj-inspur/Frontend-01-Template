@@ -1,0 +1,17 @@
+<template>
+<div>
+<img/>
+</div>
+</template><script>
+export default {
+  el:"#example" 
+  data : {
+    message:'hello'
+  },
+  computed : {
+    reveredMessage:function() {
+      reutrn this.message.split('').reverse().join("" );
+    }
+  }
+}
+</script>
