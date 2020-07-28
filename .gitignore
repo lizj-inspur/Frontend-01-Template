@@ -6,3 +6,4 @@
 week14/component/node_modules
 week15/component/node_modules
 week15/sfc/node_modules
+**/node_modules
