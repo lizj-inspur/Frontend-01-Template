@@ -1,0 +1,7 @@
+var mod = require("../dist/add.js");
+var assert = require("assert");
+describe("add", function () {
+  it("return the value of a+b ", function () {
+    assert.equal(mod.add(3, 5), 8);
+  });
+});

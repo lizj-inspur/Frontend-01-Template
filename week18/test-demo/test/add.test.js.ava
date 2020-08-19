@@ -1,0 +1,12 @@
+//let mod = require("../src/add2.js");
+let test = require("ava");
+
+import {add} from "../src/add2.js";
+//import {test} from "ava";
+test("foo ",t => {
+  if(add(3,4) ===7) {
+    t.pass();
+  }
+});
+
+
